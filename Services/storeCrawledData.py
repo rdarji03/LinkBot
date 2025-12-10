@@ -9,13 +9,14 @@ crawled_link_data = db['crawled_link_data']
 
 
 class storeCrawledData:
-    def __init__(self, urls_list=None, website_url=None, website_id=None, website_page=None, chunk_data=None, url_id=None):
+    def __init__(self, urls_list=None, website_url=None, website_id=None, website_page=None, chunk_data=None, url_id=None,chroma_id=None):
         self.urls = urls_list
         self.website_url = website_url
         self.website_id = website_id
         self.website_page = website_page
         self.chunk_data = chunk_data
         self.url_id = url_id
+        self.chroma_id = chroma_id
 
     def is_url_exist(self):
         existing = website_url_collection.find_one({"url": self.website_url})
@@ -44,7 +45,8 @@ class storeCrawledData:
             crawled_link_data.insert_one({
                 "website_id": self.website_id,
                 "url_id": self.url_id,
-                "url_content": self.chunk_data
+                "url_content": self.chunk_data,
+                "embedding_index": self.chroma_id
             })
 
         except Exception as e:

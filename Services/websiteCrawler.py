@@ -41,28 +41,36 @@ class websiteCrawller:
     def scrapLinkContent(self, extrated_links):
         for extrated_link in extrated_links:
             try:
-
                 requset_link = requests.get(extrated_link)
                 requset_link.raise_for_status()
-                requset_link_content = BeautifulSoup(
-                    requset_link.text, 'html.parser')
+
+                soup = BeautifulSoup(requset_link.text, "html.parser")
 
                 for selector in ["header", "nav", "footer", "script", "style"]:
-                    for tag in requset_link_content.select(selector):
+                    for tag in soup.select(selector):
                         tag.extract()
 
-                text_content = requset_link_content.get_text(
-                    separator="\n", strip=True)
+                text_content = soup.get_text(separator="\n", strip=True)
 
                 store_link = storeCrawledData(
-                    website_id=self.website_id, website_url=extrated_link)
+                    website_id=self.website_id,
+                    website_url=extrated_link
+                )
                 store_crawled_link = store_link.store_crawl_links()
 
                 chunk_web_data = self.chunk_data(text_content, 6)
 
-                for data in chunk_web_data:
+                for chunk in chunk_web_data:
+
+                    embedding_obj = StoreEmbeddings(chunk, self.website_id)
+                    chroma_id = embedding_obj.createEmbedding()
+
                     store_chunk = storeCrawledData(
-                        website_id=self.website_id, url_id=store_crawled_link, chunk_data=data)
+                        website_id=self.website_id,
+                        url_id=store_crawled_link,
+                        chunk_data=chunk,
+                        chroma_id=chroma_id
+                    )
                     store_chunk.add_website_link_data()
 
             except requests.exceptions.RequestException:
